@@ -21,37 +21,49 @@ class SecureStorageService {
   static Future<void> saveParticipantData(
     Map<String, dynamic> participant,
   ) async {
-    await _storage.write(key: _userIdKey, value: participant['id'].toString());
-    await _storage.write(key: _userNameKey, value: participant['name'] ?? '');
-    await _storage.write(key: _userEmailKey, value: participant['email'] ?? '');
+    await _storage.write(
+      key: _userIdKey,
+      value: (participant['id'] ?? '').toString(),
+    );
+    await _storage.write(
+      key: _userNameKey,
+      value: (participant['name'] ?? '').toString(),
+    );
+    await _storage.write(
+      key: _userEmailKey,
+      value: (participant['email'] ?? '').toString(),
+    );
     await _storage.write(
       key: _userGenderKey,
-      value: participant['gender'] ?? '',
+      value: (participant['gender'] ?? '').toString(),
     );
     await _storage.write(
       key: _userRollNoKey,
-      value: participant['rollNo'] ?? '',
+      value: (participant['rollNo'] ?? '').toString(),
     );
     await _storage.write(
       key: _userEventKey,
-      value: participant['eventN'] ?? '',
+      value: (participant['eventN'] ?? '').toString(),
     );
-    await _storage.write(key: _userTeamKey, value: participant['team'] ?? '');
+    await _storage.write(
+      key: _userTeamKey,
+      value: (participant['team'] ?? '').toString(),
+    );
     await _storage.write(
       key: _userHallKey,
-      value: participant['hall_name'] ?? '',
+      value: (participant['hall_name'] ?? '').toString(),
     );
     await _storage.write(
       key: _userMealKey,
-      value: participant['last_meal'] ?? '',
+      value: (participant['last_meal'] ?? '').toString(),
     );
     await _storage.write(
       key: _userCodeKey,
-      value: participant['uniqueCode'] ?? '',
+      value: (participant['uniqueCode'] ?? '').toString(),
     );
     await _storage.write(
       key: _userImageKey,
-      value: participant['id_generation'] ?? '',
+      value: (participant['id_generation'] ?? '').toString(),
     );
   }
 

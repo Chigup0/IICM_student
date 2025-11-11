@@ -1,52 +1,42 @@
-import 'dart:io';
+import 'dart:convert';
 import 'dart:ui' as ui;
 
-import 'package:flutter/rendering.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class QrCodeService {
-  static Future<String> generateAndSaveQrCode(String email) async {
+  static Future<String?> generateAndSaveQrCode(String email) async {
     try {
-      // Generate QR code
+      print('=== Starting QR Generation ===');
+      print('Email: $email');
+
+      // Create QR painter
       final qrPainter = QrPainter(
         data: email,
         version: QrVersions.auto,
-        eyeStyle: const QrEyeStyle(
-          eyeShape: QrEyeShape.square,
-          color: Color(0xFF1E73BE),
-        ),
-        dataModuleStyle: const QrDataModuleStyle(
-          dataModuleShape: QrDataModuleShape.square,
-          color: Color(0xFF212121),
-        ),
+        gapless: true,
       );
 
-      // Create image
-      final directory = await getApplicationDocumentsDirectory();
-      final path = '${directory.path}/qr_${email.hashCode}.png';
-      final file = File(path);
+      // Render to image
+      final image = await qrPainter.toImage(200);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
-      // Convert to image
-      final size = 320.0;
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-      qrPainter.paint(canvas, Size(size, size));
-      final picture = recorder.endRecording();
-
-      final img = await picture.toImage(size.toInt(), size.toInt());
-      final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-
-      if (byteData != null) {
-        await file.writeAsBytes(byteData.buffer.asUint8List());
-        return path;
+      if (byteData == null) {
+        print('ERROR: byteData is null');
+        return null;
       }
 
-      throw Exception('Failed to generate QR code image');
+      // Convert to base64
+      final bytes = byteData.buffer.asUint8List();
+      final base64String = base64Encode(bytes);
+      
+      print('QR Generated Successfully');
+      print('Base64 length: ${base64String.length}');
+
+      return base64String;
     } catch (e) {
-      throw Exception('Error generating QR code: $e');
+      print('QR Code Error: $e');
+      print('Stack trace: ${StackTrace.current}');
+      return null;
     }
   }
 }
