@@ -7,6 +7,6 @@
     </base-config>
 
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">34.131.232.205</domain>
+        <domain includeSubdomains="true">34.131.3.106</domain>
     </domain-config>
 </network-security-config>

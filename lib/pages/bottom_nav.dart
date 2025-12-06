@@ -1,5 +1,7 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
+
 import '../constants/colors.dart';
 import '../pages/qr_dialog.dart';
 
@@ -7,11 +9,7 @@ class BottomNav extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const BottomNav({
-    super.key,
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const BottomNav({super.key, required this.currentIndex, required this.onTap});
 
   @override
   State<BottomNav> createState() => _BottomNavState();
@@ -71,8 +69,7 @@ class _BottomNavState extends State<BottomNav> with TickerProviderStateMixin {
                 final begin = positions[_previousIndex];
                 final end = positions[widget.currentIndex];
 
-                final currentX =
-                    Tween<double>(begin: begin, end: end).evaluate(
+                final currentX = Tween<double>(begin: begin, end: end).evaluate(
                   CurvedAnimation(
                     parent: _dropletController,
                     curve: Curves.easeInOutCubic,
@@ -81,13 +78,17 @@ class _BottomNavState extends State<BottomNav> with TickerProviderStateMixin {
 
                 final dropY = TweenSequence<double>([
                   TweenSequenceItem(
-                    tween: Tween(begin: -80.0, end: 10.0)
-                        .chain(CurveTween(curve: Curves.easeOutCubic)),
+                    tween: Tween(
+                      begin: -80.0,
+                      end: 10.0,
+                    ).chain(CurveTween(curve: Curves.easeOutCubic)),
                     weight: 70,
                   ),
                   TweenSequenceItem(
-                    tween: Tween(begin: 10.0, end: 0.0)
-                        .chain(CurveTween(curve: Curves.easeOutBack)),
+                    tween: Tween(
+                      begin: 10.0,
+                      end: 0.0,
+                    ).chain(CurveTween(curve: Curves.easeOutBack)),
                     weight: 30,
                   ),
                 ]).evaluate(_dropletController);
@@ -147,8 +148,9 @@ class _BottomNavState extends State<BottomNav> with TickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(35),
                     ),
                     child: BottomNavigationBar(
-                      currentIndex:
-                          widget.currentIndex > 4 ? 0 : widget.currentIndex,
+                      currentIndex: widget.currentIndex > 4
+                          ? 0
+                          : widget.currentIndex,
                       onTap: (index) {
                         if (index == 2) {
                           showDialog(
@@ -182,7 +184,7 @@ class _BottomNavState extends State<BottomNav> with TickerProviderStateMixin {
                           label: '',
                         ),
 
-                        _navItem(Icons.menu_book_rounded, "Rules", 3),
+                        _navItem(Icons.map_rounded, "Map", 3),
                         _navItem(Icons.person_rounded, "Profile", 4),
                       ],
                     ),

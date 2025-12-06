@@ -63,7 +63,7 @@ class SecureStorageService {
     );
     await _storage.write(
       key: _userImageKey,
-      value: (participant['id_generation'] ?? '').toString(),
+      value: (participant['image'] ?? '').toString(),
     );
   }
 

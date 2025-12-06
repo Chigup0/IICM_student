@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'constants/colors.dart';
 import 'pages/home_page.dart';
 import 'pages/login_page.dart';
 import 'secure_storage.dart';
+
+final SystemUiOverlayStyle _whiteStatusBarStyle = SystemUiOverlayStyle(
+  statusBarColor: Colors.transparent,
+  statusBarBrightness:
+      Brightness.dark, // iOS: status bar background is dark -> content light
+  statusBarIconBrightness: Brightness.light, // Android: white icons
+);
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // 🔹 Fix nav bar and system theme (no red tint)
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: AppColors.primaryBackground,
-    systemNavigationBarIconBrightness: Brightness.light,
-  ));
+
+  // Lock to portrait mode (optional but recommended)
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   runApp(const MyApp());
 }
@@ -32,12 +38,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'IICM Scan',
+      title: '',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryAccent),
-        scaffoldBackgroundColor: AppColors.primaryBackground,
-        useMaterial3: true,
+        appBarTheme: const AppBarTheme(
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          ),
+        ),
       ),
+
       home: FutureBuilder<bool>(
         future: _isLoggedIn(),
         builder: (context, snapshot) {

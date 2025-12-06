@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.iicm_scan"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -39,7 +39,11 @@ android {
         }
     }
 }
-
+dependencies {
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("androidx.core:core-ktx:1.10.1")
+}
 flutter {
     source = "../.."
 }

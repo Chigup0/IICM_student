@@ -1,66 +1,35 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
+
 import '../constants/colors.dart';
-import '../secure_storage.dart';
-import 'login_page.dart';
+import 'rulebook_page.dart';
 
 class TopNav extends StatelessWidget {
   final VoidCallback onProfileTap;
 
   const TopNav({super.key, required this.onProfileTap});
 
-  Future<void> _logout(BuildContext context) async {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.secondaryBackground,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Logout',
-          style: TextStyle(
-            color: AppColors.primaryText,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to logout?',
-          style: TextStyle(color: AppColors.secondaryText),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel',
-                style: TextStyle(color: AppColors.secondaryText)),
-          ),
-          TextButton(
-            onPressed: () async {
-              await SecureStorageService.deleteUserData();
-              if (context.mounted) {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                  (route) => false,
-                );
-              }
-            },
-            child: Text('Logout',
-                style: TextStyle(color: AppColors.secondaryAccent)),
-          ),
-        ],
-      ),
+  void _openRulebook(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RulebookScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
+      // slightly smaller radius so the rounded bottom doesn't consume too much vertical space
       borderRadius: const BorderRadius.only(
-        bottomLeft: Radius.circular(26),
-        bottomRight: Radius.circular(26),
+        bottomLeft: Radius.circular(18),
+        bottomRight: Radius.circular(18),
       ),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
+          // keep container lightweight vertically
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -72,59 +41,67 @@ class TopNav extends StatelessWidget {
             ),
             border: Border(
               bottom: BorderSide(
-                color: AppColors.secondaryAccent.withOpacity(0.25),
-                width: 1.2,
+                color: AppColors.secondaryAccent.withOpacity(0.22),
+                width: 1.0,
               ),
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.secondaryAccent.withOpacity(0.12),
-                blurRadius: 30,
-                offset: const Offset(0, 8),
+                color: AppColors.secondaryAccent.withOpacity(0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: SafeArea(
             bottom: false,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                /// 🔸 Left: Logo + Titles
+                // Left block: logo + text
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Peacock-inspired glowing logo ring
+                    // smaller logo so overall header is shorter
                     Container(
-                      height: 48,
-                      width: 48,
+                      height: 44,
+                      width: 44,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: const LinearGradient(
                           colors: [
-                            Color(0xFF1E73BE), // blue from peacock
-                            Color(0xFFF7941D), // orange from sun
-                            Color(0xFF4CAF50), // green vine hint
+                            Color(0xFF1E73BE),
+                            Color(0xFFF7941D),
+                            Color(0xFF4CAF50),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF1E73BE).withOpacity(0.4),
-                            blurRadius: 14,
-                            offset: const Offset(0, 5),
+                            color: const Color(0xFF1E73BE).withOpacity(0.32),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(2.0),
                         child: ClipOval(
-                          child: Image.asset('assets/logo.jpg', fit: BoxFit.cover),
+                          child: Image.asset(
+                            'assets/logo.jpg',
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 14),
+
+                    const SizedBox(width: 12),
+
+                    // Make the column take the minimal vertical space
                     Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -136,20 +113,20 @@ class TopNav extends StatelessWidget {
                             letterSpacing: 0.5,
                           ),
                         ),
+
+                        // Tight line-height and MainAxisSize.min prevents clipping/extra space
                         ShaderMask(
                           shaderCallback: (bounds) => const LinearGradient(
-                            colors: [
-                              Color(0xFF1E73BE), // blue
-                              Color(0xFFF7941D), // orange
-                            ],
+                            colors: [Color(0xFF1E73BE), Color(0xFFF7941D)],
                           ).createShader(bounds),
                           child: const Text(
                             'Cult Meet 8.0',
                             style: TextStyle(
-                              fontSize: 21,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
                               color: Colors.white,
-                              letterSpacing: 0.8,
+                              letterSpacing: 0.25,
+                              height: 1.0, // keep descender visible but compact
                             ),
                           ),
                         ),
@@ -158,21 +135,21 @@ class TopNav extends StatelessWidget {
                   ],
                 ),
 
-                /// 🔹 Right: Profile + Logout
+                // Right block: icons
                 Row(
                   children: [
                     _iconButton(
-                      icon: Icons.account_circle_rounded,
-                      color: AppColors.primaryAccent,
-                      glow: AppColors.primaryAccent.withOpacity(0.3),
-                      onTap: onProfileTap,
+                      icon: Icons.book_rounded,
+                      color: AppColors.primaryText,
+                      glow: AppColors.primaryText.withOpacity(0.22),
+                      onTap: () => _openRulebook(context),
                     ),
                     const SizedBox(width: 8),
                     _iconButton(
-                      icon: Icons.logout_rounded,
-                      color: AppColors.secondaryAccent,
-                      glow: AppColors.secondaryAccent.withOpacity(0.3),
-                      onTap: () => _logout(context),
+                      icon: Icons.account_circle_rounded,
+                      color: AppColors.primaryAccent,
+                      glow: AppColors.primaryAccent.withOpacity(0.22),
+                      onTap: onProfileTap,
                     ),
                   ],
                 ),
@@ -191,22 +168,16 @@ class TopNav extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return InkWell(
-      borderRadius: BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(28),
       onTap: onTap,
       child: Ink(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: color.withOpacity(0.1),
-          boxShadow: [
-            BoxShadow(
-              color: glow,
-              blurRadius: 15,
-              spreadRadius: 2,
-            ),
-          ],
+          borderRadius: BorderRadius.circular(28),
+          color: color.withOpacity(0.08),
+          boxShadow: [BoxShadow(color: glow, blurRadius: 12, spreadRadius: 1)],
         ),
         padding: const EdgeInsets.all(8),
-        child: Icon(icon, color: color, size: 28),
+        child: Icon(icon, color: color, size: 26),
       ),
     );
   }

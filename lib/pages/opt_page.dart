@@ -110,7 +110,6 @@ class _OtpPageState extends State<OtpPage> {
           print('Participant Data: $participant');
 
           // Ensure id is string
-          
 
           // Save all participant data to secure storage
           await SecureStorageService.saveParticipantData(participant);
@@ -128,8 +127,9 @@ class _OtpPageState extends State<OtpPage> {
         } catch (e) {
           print('Error in response processing: $e');
           if (mounted) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
           }
         }
       } else if (response.statusCode == 402) {

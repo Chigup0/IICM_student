@@ -6,6 +6,11 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Iicm Scan</string>
+	<key>GMSApiKey</key>
+	<string>AIzaSyDZHFEF90pqrxe6kgS5ZkFmo4IEt0YpXQ0</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+<string>We need your location to show it on the map</string>
+
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +18,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>iicm_scan</string>
+	<string>IICM '25</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
