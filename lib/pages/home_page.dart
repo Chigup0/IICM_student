@@ -3,6 +3,7 @@ import 'package:iicm_scan/pages/rulebook_page.dart';
 
 import '../constants/colors.dart';
 import '../pages/bottom_nav.dart';
+import '../pages/coreteam_page.dart';
 import '../pages/qr_dialog.dart';
 import '../pages/top_nav.dart';
 import 'events_page.dart';
@@ -41,7 +42,20 @@ class _HomePageState extends State<HomePage> {
         child: TopNav(onProfileTap: _goToProfile),
       ),
 
-      body: _pages[_currentIndex],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryBackground,
+              AppColors.secondaryBackground,
+              AppColors.primaryBackground,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: _pages[_currentIndex],
+      ),
 
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 6),
@@ -212,7 +226,12 @@ class HomeContent extends StatelessWidget {
                     title: 'Team',
                     icon: Icons.people_rounded,
                     color: const Color(0xFF1E73BE),
-                    onTap: () {},
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CoreTeamPage(),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),

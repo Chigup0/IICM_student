@@ -16,6 +16,11 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // 🔹 Fix nav bar and system theme (no red tint)
+  // Source - https://stackoverflow.com/a
+  // Posted by Sanjayrajsinh, modified by community. See post 'Timeline' for change history
+  // Retrieved 2025-12-07, License - CC BY-SA 4.0
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   // Lock to portrait mode (optional but recommended)
   SystemChrome.setPreferredOrientations([
