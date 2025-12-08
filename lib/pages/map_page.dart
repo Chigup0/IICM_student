@@ -1,222 +1,226 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 
-import '../constants/colors.dart';
+void main() => runApp(const MyApp());
 
-class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
-
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'OSM Simple Map',
+      debugShowCheckedModeBanner: false,
+      home: const SimpleMapPage(),
+    );
+  }
 }
 
-class _MapScreenState extends State<MapScreen> {
-  late GoogleMapController _mapController;
-  late final CameraPosition _initialCamera;
-  final Set<Marker> _markers = {};
-  final Location _locationService = Location();
-  LatLng? _currentLocation;
-  bool _loadingLocation = false;
+enum PlaceType { location, eatery }
 
-  // Static location coordinate: 26.505223, 80.229806
-  final List<Map<String, dynamic>> _preset = [
-    {
-      'id': 'iicm_location',
-      'title': 'Inter IIT Cult Meet 8.0',
-      'lat': 26.505223,
-      'lng': 80.229806,
-    },
-    {
-      'id': 'hall-1',
-      'title': 'hall of res-1',
-      'lat': 26.506366,
-      'lng': 80.220930,
-    },
-  ];
+class Place {
+  final String name;
+  final LatLng coordinates;
+  final PlaceType type;
+
+  Place({required this.name, required this.coordinates, required this.type});
+}
+
+class SimpleMapPage extends StatefulWidget {
+  const SimpleMapPage({super.key});
+  @override
+  State<SimpleMapPage> createState() => _SimpleMapPageState();
+}
+
+class _SimpleMapPageState extends State<SimpleMapPage> {
+  final MapController _mapController = MapController();
+  final Location _location = Location();
+  LatLng? _userLocation;
 
   @override
   void initState() {
     super.initState();
-
-    // Create markers from preset list
-    for (final item in _preset) {
-      final id = item['id'] as String;
-      final lat = (item['lat'] as num).toDouble();
-      final lng = (item['lng'] as num).toDouble();
-      final title = item['title'] as String?;
-      _markers.add(
-        Marker(
-          markerId: MarkerId(id),
-          position: LatLng(lat, lng),
-          infoWindow: InfoWindow(title: title),
-          onTap: () {
-            _mapController.showMarkerInfoWindow(MarkerId(id));
-          },
-          alpha: 1.0,
-        ),
-      );
-    }
-
-    // Set initial camera position to the location
-    _initialCamera = CameraPosition(
-      target: LatLng(26.505223, 80.229806),
-      zoom: 15.0,
-    );
-
-    // Initialize location on load
-    _initLocation();
+    _getUserLocation();
   }
 
-  Future<void> _initLocation() async {
-    bool serviceEnabled = await _locationService.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await _locationService.requestService();
-      if (!serviceEnabled) return;
-    }
-
-    PermissionStatus permission = await _locationService.hasPermission();
-    if (permission == PermissionStatus.denied) {
-      permission = await _locationService.requestPermission();
-      if (permission != PermissionStatus.granted) {
-        _showLocationDeniedDialog();
-        return;
-      }
-    }
-
+  Future<void> _getUserLocation() async {
     try {
-      final loc = await _locationService.getLocation();
-      if (loc.latitude != null && loc.longitude != null) {
+      final PermissionStatus permission = await _location.requestPermission();
+      if (permission == PermissionStatus.granted) {
+        final LocationData locationData = await _location.getLocation();
         setState(() {
-          _currentLocation = LatLng(loc.latitude!, loc.longitude!);
+          _userLocation = LatLng(
+            locationData.latitude!,
+            locationData.longitude!,
+          );
         });
       }
-
-      // Listen to location changes
-      _locationService.onLocationChanged.listen((LocationData newLoc) {
-        if (newLoc.latitude == null || newLoc.longitude == null) return;
-        setState(() {
-          _currentLocation = LatLng(newLoc.latitude!, newLoc.longitude!);
-        });
-      });
     } catch (e) {
-      if (kDebugMode) {
-        print('Error getting location: $e');
-      }
+      debugPrint('Error getting location: $e');
     }
   }
 
-  void _showLocationDeniedDialog() {
+  // Sample places - easily add more
+  final List<Place> _places = [
+    Place(
+      name: 'IITK Main Gate',
+      coordinates: LatLng(26.5123, 80.2333),
+      type: PlaceType.location,
+    ),
+    Place(
+      name: 'OAT (Open Air Theatre)',
+      coordinates: LatLng(26.5092, 80.2290),
+      type: PlaceType.location,
+    ),
+    Place(
+      name: 'Domino\'s Pizza',
+      coordinates: LatLng(26.5052, 80.2295),
+      type: PlaceType.eatery,
+    ),
+    Place(
+      name: 'Cafe Coffee Day',
+      coordinates: LatLng(26.5100, 80.2350),
+      type: PlaceType.eatery,
+    ),
+  ];
+
+  void _showPlaceDetails(Place place) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.secondaryBackground,
-        title: const Text(
-          'Location Permission Denied',
-          style: TextStyle(color: AppColors.primaryText),
-        ),
-        content: const Text(
-          'This app needs location access to show your current position on the map. Please enable it in settings.',
-          style: TextStyle(color: AppColors.secondaryText),
+        title: Text(place.name),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Type: ${place.type == PlaceType.eatery ? 'Eating Place' : 'Location'}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text('Latitude: ${place.coordinates.latitude.toStringAsFixed(4)}'),
+            const SizedBox(height: 4),
+            Text(
+              'Longitude: ${place.coordinates.longitude.toStringAsFixed(4)}',
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              _locationService.requestPermission();
-              Navigator.pop(context);
-            },
-            child: const Text('Retry'),
+            child: const Text('Close'),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _moveToCurrentLocation() async {
-    if (_currentLocation == null) {
-      setState(() => _loadingLocation = true);
-      try {
-        final loc = await _locationService.getLocation();
-        if (loc.latitude != null && loc.longitude != null) {
-          final newLatLng = LatLng(loc.latitude!, loc.longitude!);
-          setState(() => _currentLocation = newLatLng);
-          _mapController.animateCamera(CameraUpdate.newLatLng(newLatLng));
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error getting current location: $e');
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _loadingLocation = false);
-        }
-      }
-    } else {
-      _mapController.animateCamera(CameraUpdate.newLatLng(_currentLocation!));
-    }
-  }
-
-  @override
-  void dispose() {
-    _mapController.dispose();
-    super.dispose();
-  }
-
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-    for (final item in _preset) {
-      _mapController.showMarkerInfoWindow(MarkerId(item['id'] as String));
-    }
+  Widget _buildMarkerIcon(PlaceType type) {
+    return type == PlaceType.eatery
+        ? const Icon(Icons.restaurant, color: Colors.orange, size: 40)
+        : const Icon(Icons.location_on, color: Colors.red, size: 40);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryBackground,
-      body: Stack(
+      body: FlutterMap(
+        mapController: _mapController,
+        options: MapOptions(
+          initialCenter: _places.first.coordinates,
+          initialZoom: 16.0,
+        ),
         children: [
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: _initialCamera,
-            markers: _markers,
-            mapType: MapType.normal,
-            myLocationEnabled: _currentLocation != null,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: true,
-            gestureRecognizers: {
-              Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
-              Factory<ScaleGestureRecognizer>(() => ScaleGestureRecognizer()),
-              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-              Factory<LongPressGestureRecognizer>(
-                () => LongPressGestureRecognizer(),
-              ),
-            },
-            compassEnabled: true,
+          TileLayer(
+            urlTemplate: 'https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png',
+            subdomains: const ['a', 'b', 'c'],
+            userAgentPackageName: 'com.iicm_scan.app',
           ),
-          // Custom location button
-          Positioned(
-            bottom: 120,
-            right: 16,
-            child: FloatingActionButton(
-              onPressed: _moveToCurrentLocation,
-              backgroundColor: AppColors.primaryAccent,
-              child: _loadingLocation
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+
+          // Markers with labels
+          MarkerLayer(
+            markers: [
+              // User location marker (if available)
+              if (_userLocation != null)
+                Marker(
+                  point: _userLocation!,
+                  width: 60,
+                  height: 60,
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade600,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'You',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    )
-                  : const Icon(Icons.my_location, color: Colors.white),
-            ),
+                      const SizedBox(height: 4),
+                      const Icon(
+                        Icons.my_location,
+                        color: Colors.blue,
+                        size: 40,
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Other places
+              ..._places
+                  .map(
+                    (place) => Marker(
+                      point: place.coordinates,
+                      width: 120,
+                      height: 100,
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () => _showPlaceDetails(place),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black87,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                place.name,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          GestureDetector(
+                            onTap: () => _showPlaceDetails(place),
+                            child: _buildMarkerIcon(place.type),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ],
           ),
         ],
       ),

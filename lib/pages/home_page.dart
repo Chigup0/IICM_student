@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
     const HomeContent(),
     const EventsScreen(),
     const SizedBox.shrink(), // QR
-    const MapScreen(),
+    const SimpleMapPage(),
     const ProfileScreen(),
   ];
 
